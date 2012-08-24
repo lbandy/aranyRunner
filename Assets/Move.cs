@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class Move : MonoBehaviour {
 
@@ -7,13 +8,15 @@ public class Move : MonoBehaviour {
     public float runSpeed = 4.0f;
     public float jumpHeight = 10f;
 
-	void Start () {
+
+    void Start()
+    {
         controller = GetComponent<CharacterController>();
-	    
-	}
+  	}
 
 
     bool jump = false;
+    bool doubleJump = false;
     bool up = true;
 
     float startX;
@@ -21,13 +24,29 @@ public class Move : MonoBehaviour {
     float jumpVelocity = 10.0f;
 
 	void Update () {
-        if (!jump && Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump"))
         {
-            jump = true;
-            up = true;
-            startX = transform.position.x;
-            startY = transform.position.y;
-            jumpVelocity = jumpHeight;
+            if (!jump)
+            {
+                jump = true;
+                up = true;
+                startX = transform.position.x;
+                startY = transform.position.y;
+                jumpVelocity = jumpHeight;
+            }
+            else if (!doubleJump)
+            {
+                doubleJump = true;
+                up = true;
+                if (jumpVelocity > 0)
+                {
+                    jumpVelocity += jumpHeight;
+                }
+                else
+                {
+                    jumpVelocity = jumpHeight;
+                }
+            }
         }
 	
 	}
@@ -40,12 +59,12 @@ public class Move : MonoBehaviour {
         {
             if (moveLeft)
             {
-                controller.Move(Vector3.left * runSpeed * Time.fixedDeltaTime * 0.5f);
+                controller.Move(Vector3.left * runSpeed * Time.fixedDeltaTime);
                 moveVelocity = controller.velocity.x;
             }
             else
             {
-                controller.Move(Vector3.right * runSpeed * Time.fixedDeltaTime * 0.5f);
+                controller.Move(Vector3.right * runSpeed * Time.fixedDeltaTime);
                 moveVelocity = controller.velocity.x;
             }
         }
@@ -65,7 +84,11 @@ public class Move : MonoBehaviour {
         }
         else if (jump)
         {
-            controller.Move(new Vector3(moveVelocity,0,0) * Time.fixedDeltaTime);
+            controller.Move(new Vector3(moveVelocity, 0, 0) * Time.fixedDeltaTime);
+        }
+        else
+        {
+            moveVelocity = 0;
         }
         
     
@@ -88,15 +111,16 @@ public class Move : MonoBehaviour {
             }
             else
             {
-                if (jumpVelocity < jumpHeight)
+                if (transform.position.y > startY)
                 {
-                    controller.Move(Vector3.down * Time.fixedDeltaTime * jumpVelocity);
-                    jumpVelocity += 0.1f;
+                    controller.Move(Vector3.up * Time.fixedDeltaTime * jumpVelocity);
+                    jumpVelocity -= 0.1f;
                 }
                 else
                 {
                     transform.position = new Vector3(transform.position.x,startY,transform.position.z);
                     jump = false;
+                    doubleJump = false;
                 }
             }
 
@@ -111,14 +135,14 @@ public class Move : MonoBehaviour {
         {
             collided = true;
             moveLeft = false;
-            Invoke("ResetCollided", 1);
+            Invoke("ResetCollided", 0.5f);
         }
 
         else if (hit.transform.name == "ColliderRight")
         {
             collided = true;
             moveLeft = true;
-            Invoke("ResetCollided", 1);
+            Invoke("ResetCollided", 0.5f);
         }
 
     }
