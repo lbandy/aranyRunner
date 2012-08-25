@@ -12,7 +12,8 @@ public class Gold : MonoBehaviour {
     Transform[] golds = new Transform[20];
 
     [System.NonSerialized]
-    public int score = 0;
+    public float score = 0;
+    float rnd;
 
     void Awake()
     {
@@ -29,12 +30,13 @@ public class Gold : MonoBehaviour {
 
     public void ResetPosition(int name)
     {
-        shinies[name] = new Vector3(random.Next(-6, 6), random.Next(7, 19), random.Next(-9, 3));
+        shinies[name] = new Vector3(random.Next(-600, 600) / 100f, random.Next(700, 1900) / 100f, random.Next(-900, 300) / 100f);
         golds[name].transform.position = new Vector3(shinies[name].x, shinies[name].y, -1f);
+        rnd = random.Next(50, 200) / 100f;
+        golds[name].transform.localScale = new Vector3(rnd,rnd, 0);
     }
 
 	void Start () {
-	
 	}
 	
 	void Update () {
